@@ -7,17 +7,24 @@ This repo is meant to be a reference and toolbox for building with Supabase.
 
 ## Getting Started
 
+You need the followings installed and running on your machine:
+- Docker
+- Supabase CLI
+
 You can clone this repo and browse through the examples directly:
 
 ```
 git clone https://github.com/ashkan-ahmadi/supabase-utils.git
 cd supabase-utils
-supabase start && supabase functions serve --env-file .env
 ```
 
-Remember: you need the followings installed and running on your machine:
-- Docker
-- Supabase CLI
+To run the project:
+1. Copy the `.env.example` file and rename it to `.env`
+1. Inside the `supabase-utils` folder, run this command to start Supabase:
+
+```
+supabase start && supabase functions serve --env-file .env
+```
 
 ## Contributing
 
