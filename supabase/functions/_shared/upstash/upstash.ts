@@ -14,7 +14,7 @@ export function createRedis() {
   })
 }
 
-export function createRateLimiter(attempts: number, duration: string, identifier: string, opts: UpstashRateLimitOptions = {}): UpstashRateLimitResponse {
+export async function createRateLimiter(attempts: number, duration: string, identifier: string, opts: UpstashRateLimitOptions = {}): Promise<UpstashRateLimitResponse> {
   // Create a new Redis ratelimiter
   const redis = createRedis()
 
@@ -31,14 +31,16 @@ export function createRateLimiter(attempts: number, duration: string, identifier
 
   const options: UpstashRateLimitOptions = { ...defaultOpts, ...opts }
 
-  const upstashRateLimit: UpstashRateLimitResponse = new Ratelimit({
+  const ratelimit = new Ratelimit({
     redis,
     limiter: Ratelimit.slidingWindow(
       attempts, // how many times you can do something
       duration // in given time frame
     ),
     ...options,
-  }).limit(identifier)
+  })
+
+  const upstashRateLimit: UpstashRateLimitResponse = await ratelimit.limit(identifier)
 
   return upstashRateLimit
 }
