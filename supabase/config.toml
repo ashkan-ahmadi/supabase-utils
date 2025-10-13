@@ -391,10 +391,22 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 
 
 # EDGE FUNCTIONS ------ START
-# Dev: Run `supabase functions serve --env-file .env`
+# Dev: Run `supabase start && supabase functions serve --env-file .env`
 # Deploy to remote Supabase: Run `supabase functions deploy [Function name] [flags]`
 # https://supabase.com/docs/guides/local-development/cli/config#edge-functions-config
 
+
+
+[functions.upstash-rate-limiter]
+enabled = true
+verify_jwt = false
+import_map = "./functions/upstash-rate-limiter/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/upstash-rate-limiter/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/upstash-rate-limiter/*.html" ]
 
 
 # EDGE FUNCTIONS ------ END
