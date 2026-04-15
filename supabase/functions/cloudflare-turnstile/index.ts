@@ -1,0 +1,87 @@
+import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
+
+// import { corsHeaders } from '../_shared/supabase/supabase.ts'
+import { corsHeaders } from 'npm:@supabase/supabase-js/cors' // v2.95.0+
+
+import { getUserIP } from '../_shared/utils.ts'
+
+import { validateTurnstile } from '../_shared/cloudflare/turnstile.ts'
+
+interface BodyReq {
+  token: string
+}
+
+// const headers = new Headers()
+// headers.set('Content-Type', 'application/json')
+
+Deno.serve(async (req: Request) => {
+  // This is needed if you're planning to invoke your function from a browser.
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  const { token }: BodyReq = await req.json()
+
+  // return new Response('ok')
+
+  if (!token) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: {
+          message: 'Missing required token',
+        },
+      }),
+      { headers: corsHeaders, status: 400 }
+    )
+  }
+
+  const ip = getUserIP(req)
+
+  if (!ip) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: {
+          message: 'Could not access IP',
+        },
+      }),
+      { headers: corsHeaders, status: 400 }
+    )
+  }
+
+  const outcome = await validateTurnstile(token, ip)
+
+  console.log({ outcome })
+
+  if (outcome.success) {
+    return new Response(
+      JSON.stringify({
+        success: true,
+      }),
+      { headers: corsHeaders }
+    )
+  } else {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: {
+          message: outcome.messages,
+          error_codes: outcome['error-codes'],
+        },
+      }),
+      { headers: corsHeaders }
+    )
+  }
+})
+
+/* To invoke locally:
+
+  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
+  2. Make an HTTP request:
+
+  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/cloudflare-turnstile' \
+    --header 'Content-Type: application/json' \
+    --data '{"token":"token_123456"}'
+
+*/

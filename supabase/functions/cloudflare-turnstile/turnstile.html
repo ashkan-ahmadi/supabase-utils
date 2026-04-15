@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cloudflare Turnstile</title>
+    <script
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+      async
+      defer
+    ></script>
+    <script>
+      // This function will run when Turnstile challenged is successful and token is created
+      function enableSubmit() {
+        document.getElementById("submit-button").disabled = false;
+      }
+    </script>
+  </head>
+  <body>
+    <form id="form">
+      <input type="text" name="name" placeholder="Name" />
+      <input type="email" name="email" placeholder="Email" />
+      <textarea name="message" placeholder="Message"></textarea>
+
+      <!-- Turnstile widget -->
+      <div
+        class="cf-turnstile"
+        data-sitekey="TURNSTALE_CLIENT_KEY"
+        data-callback="enableSubmit"
+      ></div>
+
+      <button type="submit" id="submit-button" disabled>Submit</button>
+    </form>
+
+
+    <script>
+
+      function setFormDisabledState(form, isDisabled) {
+        for (let i = 0; i < form.elements.length; i++) {
+          form.elements[i].disabled = isDisabled
+        }
+      }
+
+      const form = document.querySelector('#form')
+
+      form?.addEventListener('submit', async (e) => {
+
+        e.preventDefault()
+
+
+
+        const formData = new FormData(form)
+        const fields = Object.fromEntries(formData)
+
+        // disable after getting fields
+        setFormDisabledState(form, true)
+
+        const cfToken = fields['cf-turnstile-response']
+
+        // console.log({cfToken})
+
+        if (!cfToken) return
+
+        try {
+          const serverURL = '<FUNCTION_URL>'
+
+          const headers = new Headers()
+          // headers.set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0')
+          headers.set('Content-Type', 'application/json')
+
+          const response = await fetch(serverURL, {
+            method: 'POST',
+            body: JSON.stringify({
+              token: cfToken
+            }),
+            headers: headers
+          })
+
+          const {success} = await response.json()
+
+          if (success) {
+            alert('Success :)')
+          } else {
+            alert('Failed :(')
+          }
+
+        } catch (error) {
+          console.error(error)
+        } finally {
+          setFormDisabledState(form, false)
+        }
+      })
+    </script>
+  </body>
+</html>
