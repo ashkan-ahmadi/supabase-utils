@@ -1,3 +1,6 @@
+// https://supabase.com/docs/guides/functions/examples/cloudflare-turnstile
+// https://developers.cloudflare.com/turnstile/
+
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 
 // import { corsHeaders } from '../_shared/supabase/supabase.ts'
@@ -11,9 +14,6 @@ interface BodyReq {
   token: string
 }
 
-// const headers = new Headers()
-// headers.set('Content-Type', 'application/json')
-
 Deno.serve(async (req: Request) => {
   // This is needed if you're planning to invoke your function from a browser.
   if (req.method === 'OPTIONS') {
@@ -21,8 +21,6 @@ Deno.serve(async (req: Request) => {
   }
 
   const { token }: BodyReq = await req.json()
-
-  // return new Response('ok')
 
   if (!token) {
     return new Response(
