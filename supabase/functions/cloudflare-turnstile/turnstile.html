@@ -3,92 +3,54 @@
   <head>
     <meta charset="UTF-8" />
     <title>Cloudflare Turnstile</title>
-    <script
-      src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-      async
-      defer
-    ></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha" async defer></script>
+    <script src="turnstile.js" defer></script>
     <script>
       // This function will run when Turnstile challenged is successful and token is created
-      function enableSubmit() {
+      function enableSubmitButtonOnForm() {
         document.getElementById("submit-button").disabled = false;
       }
     </script>
   </head>
-  <body>
-    <form id="form">
-      <input type="text" name="name" placeholder="Name" />
-      <input type="email" name="email" placeholder="Email" />
-      <textarea name="message" placeholder="Message"></textarea>
-
-      <!-- Turnstile widget -->
-      <div
-        class="cf-turnstile"
-        data-sitekey="TURNSTALE_CLIENT_KEY"
-        data-callback="enableSubmit"
-      ></div>
-
-      <button type="submit" id="submit-button" disabled>Submit</button>
-    </form>
+  <body class="bg-light">
+    <main class="container py-4 col-12 col-lg-8 col-xl-6">
+      <h1>Cloudflare Turnstile</h1>
+      <p>Use Cloudflare Turnstile to fight against spam and bots on form submissions.</p>
+      <p>Check out <a href="https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/" target="_blank" rel="noopener noreferrer">how to integrate on the frontend</a> and <a href="https://developers.cloudflare.com/turnstile/get-started/server-side-validation/" target="_blank" rel="noopener noreferrer">how to validate the token on the backend</a>.</p>
 
 
-    <script>
+      <ol>
+        <li>Load the Turnstile library with the <code>defer</code> attribute if you load it in the <code>&lt;head&gt;</code> or without the attribute in the <code>&lt;footer&gt;</code>.</li>
+        <li>Add your public key to <code>data-sitekey</code> to render the widget.</li>
+      </ol>
 
-      function setFormDisabledState(form, isDisabled) {
-        for (let i = 0; i < form.elements.length; i++) {
-          form.elements[i].disabled = isDisabled
-        }
-      }
-
-      const form = document.querySelector('#form')
-
-      form?.addEventListener('submit', async (e) => {
-
-        e.preventDefault()
+      
+      <p class="alert alert-warning">
+        <strong>Do NOT expose the private secret key in your application</strong>. It needs to be kept private on your server invisible from all users.
+      </p>
 
 
+      <form id="form" class="d-flex flex-column gap-3">
+        <div>
+          <label for="name" class="form-label">Name (optional)</label>
+          <input type="text" class="form-control" name="name" id="name" placeholder="e.g. Alex Smith" autofocus />
+        </div>
 
-        const formData = new FormData(form)
-        const fields = Object.fromEntries(formData)
+        <!-- Turnstile widget -->
+        <div
+          class="cf-turnstile"
+          data-sitekey="ADD_YOUR_CLIENT_KEY_HERE"
+          data-callback="enableSubmitButtonOnForm"
+        ></div>
 
-        // disable after getting fields
-        setFormDisabledState(form, true)
+        <div>
+          <button class="btn btn-primary px-5" type="submit" id="submit-button" disabled>Submit</button>
+        </div>
+      </form>
 
-        const cfToken = fields['cf-turnstile-response']
+    </main>
 
-        // console.log({cfToken})
-
-        if (!cfToken) return
-
-        try {
-          const serverURL = '<FUNCTION_URL>'
-
-          const headers = new Headers()
-          // headers.set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0')
-          headers.set('Content-Type', 'application/json')
-
-          const response = await fetch(serverURL, {
-            method: 'POST',
-            body: JSON.stringify({
-              token: cfToken
-            }),
-            headers: headers
-          })
-
-          const {success} = await response.json()
-
-          if (success) {
-            alert('Success :)')
-          } else {
-            alert('Failed :(')
-          }
-
-        } catch (error) {
-          console.error(error)
-        } finally {
-          setFormDisabledState(form, false)
-        }
-      })
-    </script>
   </body>
 </html>
