@@ -1,4 +1,5 @@
 // import { corsHeaders } from '../supabase/supabase.ts'
+// https://developers.cloudflare.com/turnstile/get-started/server-side-validation/
 
 interface CloudflareTurnstileResponse {
   success: boolean
@@ -30,10 +31,13 @@ export async function validateTurnstile(token: string, remoteip: string) {
     }
   }
 
+  const idempotencyKey = crypto.randomUUID()
+
   const formData = new FormData()
   formData.append('secret', CLOUDFLARE_SECRET_KEY)
   formData.append('response', token)
   formData.append('remoteip', remoteip)
+  formData.append('idempotency_key', idempotencyKey)
 
   try {
     const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
