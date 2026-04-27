@@ -20,6 +20,18 @@ Deno.serve(async (req: Request) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  // This is needed if you're planning to invoke your function from a browser.
+  if (req.method !== 'POST') {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: {
+          message: 'Invalid HTTP Method. Only POST request allowed.',
+        },
+      })
+    )
+  }
+
   const { token }: BodyReq = await req.json()
 
   if (!token) {
