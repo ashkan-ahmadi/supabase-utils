@@ -60,29 +60,27 @@ Deno.serve(async (req: Request) => {
     )
   }
 
-  const outcome = await validateTurnstile(token, ip)
+  const turnstileValidation = await validateTurnstile(token, ip)
 
-  console.log({ outcome })
-
-  if (outcome.success) {
-    return new Response(
-      JSON.stringify({
-        success: true,
-      }),
-      { headers: corsHeaders }
-    )
-  } else {
+  if (!turnstileValidation.success) {
     return new Response(
       JSON.stringify({
         success: false,
         error: {
-          message: outcome.messages,
-          error_codes: outcome['error-codes'],
+          message: turnstileValidation.error?.message || 'Could not validate token',
+          error_codes: turnstileValidation['error-codes'],
         },
       }),
       { headers: corsHeaders }
     )
   }
+
+  return new Response(
+    JSON.stringify({
+      success: true,
+    }),
+    { headers: corsHeaders }
+  )
 })
 
 /* To invoke locally:
